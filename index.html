@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>2D Drawing App</title>
+    <style>
+        body { font-family: sans-serif; display: flex; gap: 20px; padding: 10px; }
+        canvas { border: 1px solid black; }
+        .controls { display: flex; flex-direction: column; gap: 10px; }
+        label { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas" width="700" height="500"></canvas>
+
+<div class="controls">
+    <label>Bentuk:
+        <select id="shape">
+            <option value="point">Titik</option>
+            <option value="line">Garis</option>
+            <option value="rect">Persegi</option>
+            <option value="ellipse">Elips</option>
+        </select>
+    </label>
+
+    <label>Warna:
+        <input type="color" id="color" value="#000000" />
+    </label>
+
+    <label>Ketebalan:
+        <input type="number" id="thickness" value="2" min="1" max="10" />
+    </label>
+
+    <button onclick="clearCanvas()">Clear</button>
+</div>
+
+<script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    let drawing = false;
+    let startX, startY;
+
+    const shapeSelect = document.getElementById("shape");
+    const colorInput = document.getElementById("color");
+    const thicknessInput = document.getElementById("thickness");
+
+    canvas.addEventListener("mousedown", (e) => {
+      drawing = true;
+      const rect = canvas.getBoundingClientRect();
+      startX = e.clientX - rect.left;
+      startY = e.clientY - rect.top;
+      if (shapeSelect.value === "point") {
+        drawPoint(startX, startY);
+      }
+    });
+
+    canvas.addEventListener("mouseup", (e) => {
+      if (!drawing) return;
+      drawing = false;
+      const rect = canvas.getBoundingClientRect();
+      const endX = e.clientX - rect.left;
+      const endY = e.clientY - rect.top;
+
+      switch (shapeSelect.value) {
+        case "line": drawLine(startX, startY, endX, endY); break;
+        case "rect": drawRect(startX, startY, endX, endY); break;
+        case "ellipse": drawEllipse(startX, startY, endX, endY); break;
+      }
+    });
+
+    function drawPoint(x, y) {
+      ctx.beginPath();
+      ctx.fillStyle = colorInput.value;
+      ctx.arc(x, y, parseInt(thicknessInput.value), 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawLine(x1, y1, x2, y2) {
+      ctx.beginPath();
+      ctx.strokeStyle = colorInput.value;
+      ctx.lineWidth = parseInt(thicknessInput.value);
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    }
+
+    function drawRect(x1, y1, x2, y2) {
+      ctx.beginPath();
+      ctx.strokeStyle = colorInput.value;
+      ctx.lineWidth = parseInt(thicknessInput.value);
+      ctx.rect(x1, y1, x2 - x1, y2 - y1);
+      ctx.stroke();
+    }
+
+    function drawEllipse(x1, y1, x2, y2) {
+      const centerX = (x1 + x2) / 2;
+      const centerY = (y1 + y2) / 2;
+      const radiusX = Math.abs(x2 - x1) / 2;
+      const radiusY = Math.abs(y2 - y1) / 2;
+
+      ctx.beginPath();
+      ctx.strokeStyle = colorInput.value;
+      ctx.lineWidth = parseInt(thicknessInput.value);
+      ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+</script>
+
+</body>
+</html>
